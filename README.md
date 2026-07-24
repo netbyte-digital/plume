@@ -79,7 +79,7 @@ Every endpoint in the [X API v2](https://developer.x.com/en/docs/x-api):
 | **Users** | `getUser`, `getUsers`, `getUserByUsername`, `getUsersByUsernames`, `me`, `searchUsers` |
 | **Likes** | `like`, `unlike`, `likingUsers`, `likedTweets` |
 | **Retweets** | `retweet`, `undoRetweet`, `retweetedBy`, `quoteTweets` |
-| **Bookmarks** | `bookmark`, `removeBookmark`, `bookmarks` |
+| **Bookmarks** | `bookmark`, `removeBookmark`, `bookmarks`, `bookmarkFolders`, `bookmarkFolder` |
 | **Follows** | `follow`, `unfollow`, `followers`, `following` |
 | **Blocks** | `block`, `unblock`, `blockedUsers` |
 | **Mutes** | `mute`, `unmute`, `mutedUsers` |
@@ -89,6 +89,25 @@ Every endpoint in the [X API v2](https://developer.x.com/en/docs/x-api):
 All methods are fully typed with enums for field selection (`TweetField`, `UserField`, `Expansion`, etc.) and return typed DTOs (`Post`, `User`, `XList`, `PaginatedResult`).
 
 ## Key Features
+
+### Bookmark Folders
+
+```php
+foreach (X::forUser($user)->bookmarkFolders() as $folder) {
+    echo $folder->name;          // "Laravel"
+    $folder->postIds();          // ['2057142315236618292', ...]
+    $folder->posts();            // hydrated Post objects
+}
+```
+
+```bash
+php artisan plume:bookmark-folders
+php artisan plume:bookmarks --folder=2027122003057295699
+```
+
+X returns post IDs only for a folder, so `posts()` issues a second lookup to
+hydrate them. This endpoint accepts no pagination parameters, so `--max-results`
+is applied client-side after the IDs are fetched.
 
 ### Typed DTOs with Active Record Methods
 
@@ -271,7 +290,7 @@ php artisan plume:home --max-results=10 --format=json
 | **Likes** | `plume:like`, `plume:unlike`, `plume:likes` |
 | **Retweets** | `plume:retweet`, `plume:unretweet` |
 | **Follows** | `plume:follow`, `plume:unfollow`, `plume:followers`, `plume:following` |
-| **Bookmarks** | `plume:bookmark`, `plume:unbookmark`, `plume:bookmarks` |
+| **Bookmarks** | `plume:bookmark`, `plume:unbookmark`, `plume:bookmarks`, `plume:bookmark-folders` |
 | **Blocks** | `plume:block`, `plume:unblock`, `plume:blocked` |
 | **Mutes** | `plume:mute`, `plume:unmute`, `plume:muted` |
 | **Media** | `plume:upload` |

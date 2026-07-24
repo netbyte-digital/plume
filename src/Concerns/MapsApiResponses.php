@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plume\Concerns;
 
+use Plume\Data\BookmarkFolder;
 use Plume\Data\Includes;
 use Plume\Data\ListMetrics;
 use Plume\Data\Media;
@@ -114,6 +115,17 @@ trait MapsApiResponses
             createdAt: $data['created_at'] ?? null,
             metrics: $metrics,
         ))->withProvider($this);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function mapBookmarkFolder(array $data, string $userId): BookmarkFolder
+    {
+        return (new BookmarkFolder(
+            id: (string) $data['id'],
+            name: (string) ($data['name'] ?? ''),
+        ))->withProvider($this, $userId);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plume\Contracts;
 
+use Plume\Data\BookmarkFolder;
 use Plume\Data\PaginatedResult;
 use Plume\Data\Post;
 use Plume\Data\User;
@@ -392,6 +393,22 @@ interface XApiProvider
         array $userFields = [],
         array $mediaFields = [],
     ): PaginatedResult;
+
+    /**
+     * The user's bookmark folders.
+     *
+     * @return list<BookmarkFolder>
+     */
+    public function bookmarkFolders(string $userId): array;
+
+    /**
+     * The IDs of the posts filed under a bookmark folder.
+     *
+     * X returns identifiers only, with no pagination.
+     *
+     * @return list<string>
+     */
+    public function bookmarkFolder(string $userId, string $folderId): array;
 
     // ── Blocks ──────────────────────────────────────────────
 

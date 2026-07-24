@@ -15,7 +15,7 @@ class BookmarksCommand extends Command
     use SupportsJsonOutput;
 
     /** @var string */
-    protected $signature = 'plume:bookmarks {--max-results=10} {--format=table}';
+    protected $signature = 'plume:bookmarks {--max-results=10} {--folder= : Only show bookmarks in this folder ID} {--format=table}';
 
     /** @var string */
     protected $description = 'List your bookmarked tweets';
@@ -34,19 +34,34 @@ class BookmarksCommand extends Command
             return $userId;
         }
 
+        $maxResults = (int) $this->option('max-results');
+        $folderId = $this->option('folder');
+        $inFolder = is_string($folderId) && $folderId !== '';
+
         try {
-            $tweets = $client->bookmarks($userId, maxResults: (int) $this->option('max-results'));
+            if ($inFolder) {
+                // The folder endpoint returns post IDs only, and accepts no
+                // pagination parameters, so it is trimmed and hydrated here.
+                $postIds = $client->bookmarkFolder($userId, $folderId);
+                $payload = $postIds === []
+                    ? []
+                    : $client->getPosts(array_slice($postIds, 0, $maxResults));
+            } else {
+                $payload = $client->bookmarks($userId, maxResults: $maxResults);
+            }
         } catch (\Throwable $e) {
             $this->error("Failed: {$e->getMessage()}");
 
             return self::FAILURE;
         }
 
-        if ($this->outputJson($tweets)) {
+        if ($this->outputJson($payload)) {
             return self::SUCCESS;
         }
 
-        if (count($tweets->data) === 0) {
+        $posts = $inFolder ? $payload : $payload->data;
+
+        if (count($posts) === 0) {
             $this->info('No bookmarked tweets found.');
 
             return self::SUCCESS;
@@ -56,10 +71,10 @@ class BookmarksCommand extends Command
             $post->id,
             Str::limit($post->text, 80),
             $post->createdAt ?? 'N/A',
-        ], $tweets->data);
+        ], $posts);
 
         $this->table(['ID', 'Text', 'Created At'], $rows);
-        $this->info(count($tweets->data).' item(s) found.');
+        $this->info(count($posts).' item(s) found.');
 
         return self::SUCCESS;
     }

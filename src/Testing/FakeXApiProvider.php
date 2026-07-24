@@ -6,6 +6,7 @@ namespace Plume\Testing;
 
 use PHPUnit\Framework\Assert;
 use Plume\Contracts\XApiProvider;
+use Plume\Data\BookmarkFolder;
 use Plume\Data\PaginatedResult;
 use Plume\Data\Post;
 use Plume\Data\User;
@@ -101,6 +102,16 @@ class FakeXApiProvider implements XApiProvider
     public function assertBookmarked(string $tweetId): void
     {
         $this->assertCalled('bookmark', fn ($args) => $args[1] === $tweetId);
+    }
+
+    public function assertBookmarkFoldersListed(): void
+    {
+        $this->assertCalled('bookmarkFolders');
+    }
+
+    public function assertBookmarkFolderRead(string $folderId): void
+    {
+        $this->assertCalled('bookmarkFolder', fn ($args) => $args[1] === $folderId);
     }
 
     public function assertFollowed(string $targetUserId): void
@@ -373,6 +384,22 @@ class FakeXApiProvider implements XApiProvider
     public function bookmarks(string $userId, int $maxResults = 100, ?string $paginationToken = null, array $tweetFields = [], array $expansions = [], array $userFields = [], array $mediaFields = []): PaginatedResult
     {
         return $this->record('bookmarks', [$userId, $maxResults, $paginationToken, $tweetFields, $expansions, $userFields, $mediaFields]) ?? new PaginatedResult(data: [], resultCount: 0);
+    }
+
+    /**
+     * @return list<BookmarkFolder>
+     */
+    public function bookmarkFolders(string $userId): array
+    {
+        return $this->record('bookmarkFolders', [$userId]) ?? [];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function bookmarkFolder(string $userId, string $folderId): array
+    {
+        return $this->record('bookmarkFolder', [$userId, $folderId]) ?? [];
     }
 
     // ── Blocks ──────────────────────────────────────────────

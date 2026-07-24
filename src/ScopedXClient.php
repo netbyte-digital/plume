@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plume;
 
 use Plume\Contracts\XApiProvider;
+use Plume\Data\BookmarkFolder;
 use Plume\Data\PaginatedResult;
 use Plume\Data\Post;
 use Plume\Data\User;
@@ -412,6 +413,22 @@ class ScopedXClient
         array $mediaFields = [],
     ): PaginatedResult {
         return $this->client->bookmarks($this->resolveUserId(), $maxResults, $paginationToken, $tweetFields, $expansions, $userFields, $mediaFields);
+    }
+
+    /**
+     * @return list<BookmarkFolder>
+     */
+    public function bookmarkFolders(): array
+    {
+        return $this->client->bookmarkFolders($this->resolveUserId());
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function bookmarkFolder(string $folderId): array
+    {
+        return $this->client->bookmarkFolder($this->resolveUserId(), $folderId);
     }
 
     // ── Follows (userId resolved automatically) ─────────────

@@ -67,6 +67,7 @@ class XServiceProvider extends ServiceProvider
                 Console\Commands\BookmarkCommand::class,
                 Console\Commands\UnbookmarkCommand::class,
                 Console\Commands\BookmarksCommand::class,
+                Console\Commands\BookmarkFoldersCommand::class,
                 Console\Commands\BlockCommand::class,
                 Console\Commands\UnblockCommand::class,
                 Console\Commands\BlockedCommand::class,
