@@ -46,6 +46,20 @@ class XApiClient implements XApiProvider
      */
     public function forUser(HasXCredentials|array $credentials): ScopedXClient
     {
+        return new ScopedXClient($this->withUserCredentials($credentials));
+    }
+
+    /**
+     * Return a copy of this client authenticated as the given user.
+     *
+     * Unlike forUser(), this preserves the XApiProvider interface, so callers
+     * that pass user IDs explicitly (such as the artisan commands) can operate
+     * under OAuth 2.0 user context without switching to ScopedXClient.
+     *
+     * @param  HasXCredentials|array<string, string|null>  $credentials
+     */
+    public function withUserCredentials(HasXCredentials|array $credentials): self
+    {
         if ($credentials instanceof HasXCredentials) {
             $credentials = $credentials->toXCredentials();
         }
@@ -62,8 +76,6 @@ class XApiClient implements XApiProvider
             expiresAt: $credentials['expires_at'] ?? null,
         );
 
-        $userClient = new self($userHttp);
-
-        return new ScopedXClient($userClient);
+        return new self($userHttp);
     }
 }

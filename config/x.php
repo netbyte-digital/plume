@@ -43,6 +43,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | OAuth 2.0 User Context Tokens
+    |--------------------------------------------------------------------------
+    |
+    | Endpoints such as bookmarks, likes, follows and mutes reject app-only
+    | authentication. When these are set, the artisan commands authenticate as
+    | the user rather than as the application.
+    |
+    | Applications that store tokens elsewhere (a database, for instance) may
+    | instead bind "x.credentials" in a service provider to a HasXCredentials
+    | instance or a credentials array, which takes precedence over these values.
+    |
+    */
+
+    'access_token' => env('X_ACCESS_TOKEN'),
+    'refresh_token' => env('X_REFRESH_TOKEN'),
+    'expires_at' => env('X_TOKEN_EXPIRES_AT'),
+
+    /*
+    |--------------------------------------------------------------------------
     | OAuth 2.0 Redirect URI
     |--------------------------------------------------------------------------
     */
