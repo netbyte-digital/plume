@@ -387,19 +387,19 @@ class FakeXApiProvider implements XApiProvider
     }
 
     /**
-     * @return list<BookmarkFolder>
+     * @return PaginatedResult<BookmarkFolder>
      */
-    public function bookmarkFolders(string $userId): array
+    public function bookmarkFolders(string $userId, ?int $maxResults = null, ?string $paginationToken = null): PaginatedResult
     {
-        return $this->record('bookmarkFolders', [$userId]) ?? [];
+        return $this->record('bookmarkFolders', [$userId, $maxResults, $paginationToken]) ?? new PaginatedResult(data: [], resultCount: 0);
     }
 
     /**
-     * @return list<string>
+     * @return PaginatedResult<string>
      */
-    public function bookmarkFolder(string $userId, string $folderId): array
+    public function bookmarkFolder(string $userId, string $folderId, ?int $maxResults = null, ?string $paginationToken = null): PaginatedResult
     {
-        return $this->record('bookmarkFolder', [$userId, $folderId]) ?? [];
+        return $this->record('bookmarkFolder', [$userId, $folderId, $maxResults, $paginationToken]) ?? new PaginatedResult(data: [], resultCount: 0);
     }
 
     // ── Blocks ──────────────────────────────────────────────

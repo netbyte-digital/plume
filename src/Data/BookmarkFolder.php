@@ -29,16 +29,39 @@ class BookmarkFolder
     }
 
     /**
-     * The IDs of the posts filed under this folder.
+     * A page of post IDs filed under this folder.
      *
      * X returns identifiers only. Hydrate them with getPosts() when the post
      * bodies are needed.
      *
+     * @return PaginatedResult<string>
+     */
+    public function postIdsPaginated(?int $maxResults = null, ?string $paginationToken = null): PaginatedResult
+    {
+        return $this->provider()->bookmarkFolder($this->userId(), $this->id, $maxResults, $paginationToken);
+    }
+
+    /**
+     * Every post ID filed under this folder, following pagination to the end.
+     *
      * @return list<string>
      */
-    public function postIds(): array
+    public function postIds(?int $maxResults = null): array
     {
-        return $this->provider()->bookmarkFolder($this->userId(), $this->id);
+        $page = $this->postIdsPaginated($maxResults);
+        $ids = $page->data;
+
+        while ($page->hasNextPage()) {
+            $page = $page->nextPage();
+
+            if ($page === null) {
+                break;
+            }
+
+            $ids = [...$ids, ...$page->data];
+        }
+
+        return array_values($ids);
     }
 
     /**

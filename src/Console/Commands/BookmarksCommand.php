@@ -40,9 +40,21 @@ class BookmarksCommand extends Command
 
         try {
             if ($inFolder) {
-                // The folder endpoint returns post IDs only, and accepts no
-                // pagination parameters, so it is trimmed and hydrated here.
-                $postIds = $client->bookmarkFolder($userId, $folderId);
+                // The folder endpoint returns post IDs only, so they are
+                // trimmed to the requested count and hydrated separately.
+                $page = $client->bookmarkFolder($userId, $folderId, $maxResults);
+                $postIds = $page->data;
+
+                while (count($postIds) < $maxResults && $page->hasNextPage()) {
+                    $page = $page->nextPage();
+
+                    if ($page === null) {
+                        break;
+                    }
+
+                    $postIds = [...$postIds, ...$page->data];
+                }
+
                 $payload = $postIds === []
                     ? []
                     : $client->getPosts(array_slice($postIds, 0, $maxResults));

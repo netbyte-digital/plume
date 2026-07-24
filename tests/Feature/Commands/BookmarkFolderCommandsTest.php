@@ -13,7 +13,7 @@ beforeEach(function (): void {
             ['id' => '555', 'name' => 'Laravel'],
             ['id' => '666', 'name' => 'Design'],
         ]]),
-        'api.x.com/2/users/99/bookmarks/folders/555' => Http::response(['data' => [
+        'api.x.com/2/users/99/bookmarks/folders/555*' => Http::response(['data' => [
             ['id' => '111'], ['id' => '222'], ['id' => '333'],
         ]]),
         'api.x.com/2/tweets*' => Http::response(['data' => [
@@ -49,8 +49,7 @@ it('trims folder results to max-results client side', function (): void {
     $this->artisan('plume:bookmarks', ['--folder' => '555', '--max-results' => 2])
         ->assertSuccessful();
 
-    // The folder endpoint rejects pagination params, so the ids are sliced
-    // before hydrating; only two of the three should be requested.
+    // Only the first two of the three IDs should be hydrated.
     Http::assertSent(function ($request) {
         if (! str_contains($request->url(), '/2/tweets')) {
             return false;
@@ -64,7 +63,7 @@ it('trims folder results to max-results client side', function (): void {
 it('reports an empty folder without hydrating posts', function (): void {
     Http::fake([
         'api.x.com/2/users/me*' => Http::response(['data' => ['id' => '99', 'username' => 'me', 'name' => 'Me']]),
-        'api.x.com/2/users/99/bookmarks/folders/777' => Http::response(['data' => []]),
+        'api.x.com/2/users/99/bookmarks/folders/777*' => Http::response(['data' => []]),
     ]);
 
     $this->artisan('plume:bookmarks', ['--folder' => '777'])

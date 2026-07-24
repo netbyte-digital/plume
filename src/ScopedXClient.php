@@ -416,19 +416,19 @@ class ScopedXClient
     }
 
     /**
-     * @return list<BookmarkFolder>
+     * @return PaginatedResult<BookmarkFolder>
      */
-    public function bookmarkFolders(): array
+    public function bookmarkFolders(?int $maxResults = null, ?string $paginationToken = null): PaginatedResult
     {
-        return $this->client->bookmarkFolders($this->resolveUserId());
+        return $this->client->bookmarkFolders($this->resolveUserId(), $maxResults, $paginationToken);
     }
 
     /**
-     * @return list<string>
+     * @return PaginatedResult<string>
      */
-    public function bookmarkFolder(string $folderId): array
+    public function bookmarkFolder(string $folderId, ?int $maxResults = null, ?string $paginationToken = null): PaginatedResult
     {
-        return $this->client->bookmarkFolder($this->resolveUserId(), $folderId);
+        return $this->client->bookmarkFolder($this->resolveUserId(), $folderId, $maxResults, $paginationToken);
     }
 
     // ── Follows (userId resolved automatically) ─────────────

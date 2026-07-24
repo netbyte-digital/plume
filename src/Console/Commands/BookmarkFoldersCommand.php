@@ -14,7 +14,7 @@ class BookmarkFoldersCommand extends Command
     use SupportsJsonOutput;
 
     /** @var string */
-    protected $signature = 'plume:bookmark-folders {--format=table}';
+    protected $signature = 'plume:bookmark-folders {--max-results= : Folders per request (1-100)} {--format=table}';
 
     /** @var string */
     protected $description = 'List your bookmark folders';
@@ -34,7 +34,18 @@ class BookmarkFoldersCommand extends Command
         }
 
         try {
-            $folders = $client->bookmarkFolders($userId);
+            $page = $client->bookmarkFolders($userId, $this->option('max-results') !== null ? (int) $this->option('max-results') : null);
+            $folders = $page->data;
+
+            while ($page->hasNextPage()) {
+                $page = $page->nextPage();
+
+                if ($page === null) {
+                    break;
+                }
+
+                $folders = [...$folders, ...$page->data];
+            }
         } catch (\Throwable $e) {
             $this->error("Failed: {$e->getMessage()}");
 

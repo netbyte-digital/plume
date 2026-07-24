@@ -397,18 +397,27 @@ interface XApiProvider
     /**
      * The user's bookmark folders.
      *
-     * @return list<BookmarkFolder>
+     * @return PaginatedResult<BookmarkFolder>
      */
-    public function bookmarkFolders(string $userId): array;
+    public function bookmarkFolders(
+        string $userId,
+        ?int $maxResults = null,
+        ?string $paginationToken = null,
+    ): PaginatedResult;
 
     /**
      * The IDs of the posts filed under a bookmark folder.
      *
-     * X returns identifiers only, with no pagination.
+     * X returns identifiers only, not post bodies.
      *
-     * @return list<string>
+     * @return PaginatedResult<string>
      */
-    public function bookmarkFolder(string $userId, string $folderId): array;
+    public function bookmarkFolder(
+        string $userId,
+        string $folderId,
+        ?int $maxResults = null,
+        ?string $paginationToken = null,
+    ): PaginatedResult;
 
     // ── Blocks ──────────────────────────────────────────────
 

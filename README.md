@@ -106,8 +106,19 @@ php artisan plume:bookmarks --folder=2027122003057295699
 ```
 
 X returns post IDs only for a folder, so `posts()` issues a second lookup to
-hydrate them. This endpoint accepts no pagination parameters, so `--max-results`
-is applied client-side after the IDs are fetched.
+hydrate them. Both folder endpoints accept `max_results` (1-100) and
+`pagination_token` and return a `PaginatedResult`:
+
+```php
+$page = X::forUser($user)->bookmarkFolders(maxResults: 100);
+
+while ($page->hasNextPage()) {
+    $page = $page->nextPage();
+}
+```
+
+Note that as of writing X clamps the folder list to 20 and returns no
+`meta.next_token`, so pagination is honoured but never triggers in practice.
 
 ### Typed DTOs with Active Record Methods
 

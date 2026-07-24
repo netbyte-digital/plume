@@ -61,35 +61,79 @@ trait ManagesBookmarks
     /**
      * The user's bookmark folders.
      *
-     * X does not paginate this endpoint, so every folder is returned at once.
-     *
-     * @return list<BookmarkFolder>
+     * @return PaginatedResult<BookmarkFolder>
      */
-    public function bookmarkFolders(string $userId): array
-    {
-        $response = $this->http->get("/2/users/{$userId}/bookmarks/folders");
+    public function bookmarkFolders(
+        string $userId,
+        ?int $maxResults = null,
+        ?string $paginationToken = null,
+    ): PaginatedResult {
+        $query = [];
 
-        return array_values(array_map(
-            fn (array $folder): BookmarkFolder => $this->mapBookmarkFolder($folder, $userId),
-            $response['data'] ?? [],
-        ));
+        if ($maxResults !== null) {
+            $query['max_results'] = $maxResults;
+        }
+
+        if ($paginationToken !== null) {
+            $query['pagination_token'] = $paginationToken;
+        }
+
+        $response = $this->http->get("/2/users/{$userId}/bookmarks/folders", $query);
+
+        return $this->paginatedBookmarkFolders(
+            $response,
+            $userId,
+            fn (string $token): PaginatedResult => $this->bookmarkFolders($userId, $maxResults, $token),
+        );
     }
 
     /**
      * The IDs of the posts filed under a bookmark folder.
      *
-     * This endpoint returns identifiers only — no post bodies, and no
-     * pagination. Use getPosts() to hydrate them.
+     * This endpoint returns identifiers only, not post bodies. Use getPosts()
+     * to hydrate them.
      *
-     * @return list<string>
+     * @return PaginatedResult<string>
      */
-    public function bookmarkFolder(string $userId, string $folderId): array
-    {
-        $response = $this->http->get("/2/users/{$userId}/bookmarks/folders/{$folderId}");
+    public function bookmarkFolder(
+        string $userId,
+        string $folderId,
+        ?int $maxResults = null,
+        ?string $paginationToken = null,
+    ): PaginatedResult {
+        $query = [];
 
-        return array_values(array_filter(array_map(
-            fn (array $post): ?string => isset($post['id']) ? (string) $post['id'] : null,
-            $response['data'] ?? [],
-        )));
+        if ($maxResults !== null) {
+            $query['max_results'] = $maxResults;
+        }
+
+        if ($paginationToken !== null) {
+            $query['pagination_token'] = $paginationToken;
+        }
+
+        $response = $this->http->get("/2/users/{$userId}/bookmarks/folders/{$folderId}", $query);
+
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $response['data'] ?? [];
+
+        /** @var list<string> $postIds */
+        $postIds = [];
+
+        foreach ($items as $post) {
+            if (isset($post['id'])) {
+                $postIds[] = (string) $post['id'];
+            }
+        }
+
+        $result = new PaginatedResult(
+            data: $postIds,
+            nextToken: $response['meta']['next_token'] ?? null,
+            previousToken: $response['meta']['previous_token'] ?? null,
+            resultCount: $response['meta']['result_count'] ?? count($postIds),
+        );
+
+        return $result->withNextPageCallback(
+            fn (string $token): PaginatedResult => $this->bookmarkFolder($userId, $folderId, $maxResults, $token),
+        );
     }
 }

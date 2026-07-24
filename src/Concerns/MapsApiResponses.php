@@ -129,6 +129,30 @@ trait MapsApiResponses
     }
 
     /**
+     * @param  array<string, mixed>  $response
+     * @return PaginatedResult<BookmarkFolder>
+     */
+    protected function paginatedBookmarkFolders(array $response, string $userId, ?\Closure $nextPageCallback = null): PaginatedResult
+    {
+        /** @var array<int, array<string, mixed>> $dataItems */
+        $dataItems = $response['data'] ?? [];
+        $folders = array_map(fn (array $item): BookmarkFolder => $this->mapBookmarkFolder($item, $userId), $dataItems);
+
+        $result = new PaginatedResult(
+            data: array_values($folders),
+            nextToken: $response['meta']['next_token'] ?? null,
+            previousToken: $response['meta']['previous_token'] ?? null,
+            resultCount: $response['meta']['result_count'] ?? count($folders),
+        );
+
+        if ($nextPageCallback !== null) {
+            $result = $result->withNextPageCallback($nextPageCallback);
+        }
+
+        return $result;
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     protected function mapMedia(array $data): Media
